@@ -37,6 +37,7 @@ erDiagram
     AGENDA ||--o| RECIPE : contains
     RECIPE ||--o| INGREDIENT : uses
 ---
+```
 
 ## 🗺️ Roadmap de Développement
 
@@ -67,7 +68,7 @@ erDiagram
 ```bash
 git clone [https://github.com/votre-username/nutriflow.git](https://github.com/votre-username/nutriflow.git)
 cd nutriflow
-
+```
 
 ### 2. Installer les dépendances
 
@@ -109,5 +110,3 @@ npm run dev
 ## ⚠️ Note sur le Click & Collect
 
 L'intégration Leclerc utilise une approche par automatisation de navigateur (Headless Browser via Playwright). Veillez à respecter les conditions d'utilisation de l'enseigne lors du déploiement et à ne pas abuser des requêtes.
-
-```
