@@ -36,7 +36,6 @@ erDiagram
     PROFILE ||--o| AGENDA : fills
     AGENDA ||--o| RECIPE : contains
     RECIPE ||--o| INGREDIENT : uses
----
 ```
 
 ## 🗺️ Roadmap de Développement
