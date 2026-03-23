@@ -1,34 +1,46 @@
-# 🥗 NutriFlow : L'Assistant Culinaire Intelligent & Logistique
+# NutriFlow : assistant culinaire intelligent et logistique
 
-**NutriFlow** est une solution web "Full-Stack" moderne conçue pour éliminer la charge mentale liée à l'alimentation. Contrairement aux applications de recettes classiques, NutriFlow fusionne la **planification d'agenda**, l'**intelligence artificielle personnalisée** et la **logistique d'achat (Click & Collect)**.
-
----
-
-## ✨ Points Forts du Projet
-
-* **🧬 Profil ADN Culinaire :** Adapte les recettes à ton niveau réel (Débutant à Chef), tes allergies et tes objectifs (Kcal, Protéines, Lipides, Glucides).
-* **📅 Agenda Hybride :** Planifie ta semaine en distinguant les repas à la **Maison**, au **Resto**, ou **À l'extérieur** pour ne jamais acheter d'ingrédients inutiles.
-* **🤖 IA Recipe Engine (GPT-4o) :** Réécrit les instructions de cuisson selon ton matériel et ton temps disponible (ex: transforme une recette de 45min en version express 15min).
-* **🛒 Click & Collect Sync :** Connecte ta liste de courses directement aux enseignes (Leclerc Drive, etc.) via un moteur de matching de produits.
-* **📱 Expérience PWA :** Interface minimaliste, fluide et installable sur mobile comme une application native.
+**NutriFlow** est une solution « full stack » visant à réduire la charge mentale liée à l’alimentation. Par rapport aux applis de recettes classiques, le projet combine **planification d’agenda**, **personnalisation (profil « ADN culinaire »)** et, à terme, **logistique d’achat (Click & Collect)**.
 
 ---
 
-## 🛠 Tech Stack (Architecture Monorepo)
+## Points forts (vision produit)
 
-| Secteur | Technologie |
+* **Profil ADN culinaire :** adapter recettes et portions au niveau (débutant → confirmé), aux contraintes (allergies) et aux objectifs nutritionnels (calories, macros).
+* **Agenda hybride :** planifier la semaine en distinguant repas **à la maison**, **au restaurant** ou **à l’extérieur**, pour éviter d’acheter des ingrédients inutiles.
+* **Moteur de recettes assisté par IA :** réécrire ou raccourcir les étapes selon le temps et le matériel disponibles (objectif métier ; l’appel IA sera orchestré côté **backend**).
+* **Click & Collect :** rapprocher la liste de courses des catalogues drive (matching produits, scripts d’automatisation — voir dossier `integrations/`).
+* **Expérience web / PWA :** interface claire, utilisable sur mobile ; la couche PWA est une **cible** du front (voir `FrontEnd/TACHES.md`).
+
+---
+
+## Stack technique actuelle (état du dépôt)
+
+Le dépôt est un **monorepo** : API Java, client web en cours de montage, dossiers réservés pour Docker, mobile et intégrations externes.
+
+| Zone | Technologie |
 | :--- | :--- |
-| **Framework** | [Next.js 15+](https://nextjs.org/) (App Router & Server Actions) |
-| **Langage** | TypeScript (Type-safe du front au back) |
-| **Design** | Tailwind CSS + Framer Motion (Animations fluides) |
-| **Backend/Auth** | [Supabase](https://supabase.com/) (PostgreSQL + Realtime) |
-| **IA** | OpenAI API / LangChain |
-| **Automation** | Playwright (pour la synchronisation Click & Collect) |
-| **Déploiement** | Vercel |
+| **API** | [Spring Boot](https://spring.io/projects/spring-boot) **3.2.x**, **Java 21** — Web + Spring Data JPA ([`BackEnd/pom.xml`](BackEnd/pom.xml)) |
+| **Base de données** | [PostgreSQL](https://www.postgresql.org/) (connexion JDBC / Hibernate ; pas de BaaS type Supabase dans la stack retenue) |
+| **Front web** | [Tailwind CSS](https://tailwindcss.com/) v4 + PostCSS déjà présents ; **framework UI (ex. React / Next.js) à initialiser** — voir [`FrontEnd/TACHES.md`](FrontEnd/TACHES.md) |
+| **Mobile** | Dossier [`Mobile/`](Mobile/) réservé (fichiers de suivi uniquement pour l’instant) |
+| **Conteneurs** | Dossier [`Docker/`](Docker/) réservé |
+| **Intégrations** | [`integrations/`](integrations/) — Click & Collect, **Open Food Facts** (voir ci-dessous), **Playwright** en option pour des PoC drive (respecter les CGU des enseignes) |
+| **IA** | Appels **OpenAI** (ou équivalent) prévus **depuis le backend** (HTTP, quotas, timeouts) — pas LangChain imposé dans le code actuel |
+
+> Un second `pom.xml` à la **racine** du dépôt existe mais ne correspond pas au module applicatif principal : l’API à lancer est sous **`BackEnd/`**.
+
+### Données nutritionnelles de référence (produits)
+
+Pour les **références alimentaires** sur produits emballés (énergie en kcal, protéines, glucides, lipides, sel, fibres, etc., en général **pour 100 g** ou par portion selon les champs disponibles), NutriFlow s’appuie sur la base [**Open Food Facts**](https://world.openfoodfacts.org/data).
+
+* **Documentation officielle** : [Data, API, exports et conditions de réutilisation](https://world.openfoodfacts.org/data) (licence **Open Database License** pour la base ; lire les conditions avant toute réutilisation).
+* **Usage prévu dans l’app** : appels à l’**API produit** (JSON/XML) **depuis le backend** (proxy, cache, en-tête `User-Agent` identifiable), pas depuis le navigateur — conformément aux bonnes pratiques décrites sur la page Data (en production, l’API live est pensée pour des consultations unitaires, par ex. liées à un scan réel ; les **exports** JSONL/CSV/Parquet servent aux usages de masse ou analytiques).
+* **Matching drive** : le rapprochement avec les paniers Click & Collect reste dans [`integrations/`](integrations/) ; les données OFF enrichissent ou valident les produits (code-barres / EAN quand disponible).
 
 ---
 
-## 🗄️ Structure de la Base de Données
+## Structure métier des données (aperçu)
 
 ```mermaid
 erDiagram
@@ -38,74 +50,96 @@ erDiagram
     RECIPE ||--o| INGREDIENT : uses
 ```
 
-## 🗺️ Roadmap de Développement
-
-### Phase 1 : Fondations & Profilage (MVP)
-- [ ] Setup Next.js + Tailwind + Supabase Auth.
-- [ ] Création de l'onboarding "ADN Culinaire" (Quiz de niveau et objectifs).
-- [ ] Dashboard minimaliste affichant les macros quotidiennes.
-
-### Phase 2 : L'Agenda Intelligent
-- [ ] Vue calendrier hebdomadaire avec gestion des repas "Hors-foyer".
-- [ ] Moteur de suggestion de recettes basé sur le temps disponible et les macros.
-- [ ] Intégration de l'IA pour la modification dynamique des recettes.
-
-### Phase 3 : Logistique & Courses
-- [ ] Générateur de liste de courses intelligente (agrégation des ingrédients).
-- [ ] Module de matching avec les produits de grande distribution (EAN/Open Food Facts).
-- [ ] Script de synchronisation avec le panier Leclerc Drive (Playwright).
-
-### Phase 4 : Optimisation & PWA
-- [ ] Mode Offline (PWA) pour consultation en magasin.
-- [ ] Notifications de rappel pour la préparation en amont (Batch Cooking).
+Les entités Java en cours de modélisation se trouvent sous [`BackEnd/src/main/java/com/nutriflow/backend/entities/`](BackEnd/src/main/java/com/nutriflow/backend/entities/).
 
 ---
 
-## 🚀 Installation Locale
+## Suivi des tâches
 
-1. **Cloner le projet**
+Des fichiers **`TACHES.md`** décrivent le travail par zone. L’index central est [`SUIVI-TACHES.md`](SUIVI-TACHES.md).
+
+---
+
+## Roadmap de développement (alignée sur le repo)
+
+### Phase 1 : fondations
+- [ ] API Spring : sécurité (JWT ou session), validation, CORS avec l’URL du front.
+- [ ] Schéma PostgreSQL stable (Flyway ou Liquibase).
+- [ ] Front : choix et initialisation du framework + TypeScript + Tailwind + design system (couleurs maquette dans `FrontEnd/TACHES.md`).
+
+### Phase 2 : agenda et recettes
+- [ ] Vues planning / calendrier et suggestion de recettes (temps, macros).
+- [ ] Endpoints métier + intégration IA côté serveur pour adaptation des recettes.
+
+### Phase 3 : logistique et courses
+- [ ] Agrégation des ingrédients et génération de liste de courses.
+- [ ] Matching produits (EAN / libellés) avec enrichissement nutritionnel via [Open Food Facts](https://world.openfoodfacts.org/data) quand un code-barres est connu.
+- [ ] Expérimentations Click & Collect dans `integrations/` (dont Playwright si pertinent).
+
+### Phase 4 : robustesse et PWA
+- [ ] PWA (manifest, service worker, hors-ligne lecture si possible).
+- [ ] Rappels / notifications (selon besoin produit).
+- [ ] Observabilité (Spring Boot Actuator, etc.).
+
+---
+
+## Installation locale
+
+### Prérequis
+
+- **JDK 21**, **Maven 3.x**
+- **PostgreSQL** (ex. base `nutriflow_db` — ajuster selon votre instance)
+- **Node.js** (pour le dossier `FrontEnd/` une fois le framework ajouté)
+
+### 1. Cloner le dépôt
+
 ```bash
-git clone [https://github.com/votre-username/nutriflow.git](https://github.com/votre-username/nutriflow.git)
-cd nutriflow
+git clone https://github.com/<votre-org>/NutriChef-AI.git
+cd NutriChef-AI
 ```
 
-### 2. Installer les dépendances
+### 2. Base de données et backend
+
+Configurer la connexion dans [`BackEnd/src/main/resources/application.properties`](BackEnd/src/main/resources/application.properties) (URL JDBC, utilisateur, mot de passe), puis :
 
 ```bash
+cd BackEnd
+./mvnw spring-boot:run
+```
+
+*(Si `mvnw` est absent, utilisez `mvn spring-boot:run` après `mvn wrapper:wrapper` ou installez le wrapper Maven du projet.)*
+
+### 3. Front-end
+
+Aujourd’hui, seules les dépendances outillage CSS sont déclarées. Après initialisation du framework (voir tâches front) :
+
+```bash
+cd FrontEnd
 npm install
-
+# puis la commande fournie par le boilerplate (ex. npm run dev)
 ```
 
-### 3. Configurer les variables d'environnement (`.env.local`)
+Variables typiques côté front : URL de l’API (ex. `VITE_API_URL`, `NEXT_PUBLIC_API_URL`, etc. selon l’outil choisi).
 
-Créez un fichier `.env.local` à la racine et ajoutez vos clés :
+### 4. Secrets (IA, drives)
+
+Ne pas commiter de clés. Exemples de variables à définir en local ou en CI :
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=votre_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
-OPENAI_API_KEY=votre_cle_openai
-LECLERC_USER=votre_email_drive
-LECLERC_PASS=votre_password_drive
-
-```
-
-### 4. Lancer le serveur de développement
-
-```bash
-npm run dev
-
+OPENAI_API_KEY=...
+# Identifiants drive / scripts : uniquement hors repo (vault, .env local ignoré par git)
 ```
 
 ---
 
-## 🎨 Principes de Design
+## Principes de design (front)
 
-* **Minimalisme :** Utilisation massive d'espaces blancs et de typographies claires (Inter/Geist).
-* **Fluidité :** Transitions douces entre l'agenda et la fiche recette avec Framer Motion.
-* **Accessibilité :** Contrastes élevés pour une lecture facile en cuisine, boutons larges pour le mobile.
+* **Lisibilité :** beaucoup d’air, typographie claire.
+* **Transitions :** animations discrètes si le projet adopte une librairie dédiée (ex. Framer Motion — optionnelle).
+* **Accessibilité :** contrastes et zones tactiles suffisantes pour usage en cuisine.
 
 ---
 
-## ⚠️ Note sur le Click & Collect
+## Note légale — Click & Collect
 
-L'intégration Leclerc utilise une approche par automatisation de navigateur (Headless Browser via Playwright). Veillez à respecter les conditions d'utilisation de l'enseigne lors du déploiement et à ne pas abuser des requêtes.
+Toute automatisation de navigateur (ex. Playwright) sur un site marchand doit respecter les **conditions d’utilisation** de l’enseigne, limiter la fréquence des actions et traiter les identifiants comme des **secrets**.
