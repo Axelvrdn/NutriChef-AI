@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #4c644f;
+  --color-primary-dim: #405843;
+  --color-primary-container: #dfe9df;
+  --color-surface: #fbf9f5;
+  --color-surface-low: #f5f4ef;
+  --color-surface-high: #ece9df;
+  --color-surface-card: #ffffff;
+  --color-tertiary-container: #eef2ea;
+  --color-on-surface: #30332e;
+  --color-on-surface-soft: #667066;
+  --color-error: #9f403d;
+  --shadow-ambient: 0 20px 40px rgba(48, 51, 46, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+button,
+textarea {
+  font: inherit;
+}
+
+.page-title {
+  font-family: var(--font-manrope), sans-serif;
+  font-size: clamp(2.2rem, 3vw, 4rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.section-title {
+  font-family: var(--font-manrope), sans-serif;
+  font-size: clamp(1.6rem, 2vw, 2.4rem);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0;
+}
