@@ -1,148 +1,252 @@
 # NutriFlow : assistant culinaire intelligent et logistique
 
-**NutriFlow** est une solution « full stack » visant à réduire la charge mentale liée à l’alimentation. Par rapport aux applis de recettes classiques, le projet combine **planification d’agenda**, **personnalisation (profil « ADN culinaire »)** et, à terme, **logistique d’achat (Click & Collect)**.
+**NutriFlow** est une solution « full stack » visant à réduire la charge mentale liée à l'alimentation. Le projet combine **planification d'agenda**, **personnalisation (profil « ADN culinaire »)** et **logistique d'achat (Click & Collect)**.
 
 ---
 
-## Points forts (vision produit)
-
-* **Profil ADN culinaire :** adapter recettes et portions au niveau (débutant → confirmé), aux contraintes (allergies) et aux objectifs nutritionnels (calories, macros).
-* **Agenda hybride :** planifier la semaine en distinguant repas **à la maison**, **au restaurant** ou **à l’extérieur**, pour éviter d’acheter des ingrédients inutiles.
-* **Moteur de recettes assisté par IA :** réécrire ou raccourcir les étapes selon le temps et le matériel disponibles (objectif métier ; l’appel IA sera orchestré côté **backend**).
-* **Click & Collect :** rapprocher la liste de courses des catalogues drive (matching produits, scripts d’automatisation — voir dossier `integrations/`).
-* **Extension navigateur drive sync :** lancer l’ajout panier depuis NutriFlow vers plusieurs enseignes via un modèle d’adaptateurs.
-* **Expérience web / PWA :** interface claire, utilisable sur mobile ; la couche PWA est une **cible** du front (voir `FrontEnd/TACHES.md`).
-
----
-
-## Stack technique actuelle (état du dépôt)
+## Stack technique
 
 Le dépôt est un **monorepo** : API Java, client web en cours de montage, dossiers réservés pour Docker, mobile et intégrations externes.
 
 | Zone | Technologie |
 | :--- | :--- |
 | **API** | [Spring Boot](https://spring.io/projects/spring-boot) **3.2.x**, **Java 21** — Web + Spring Data JPA ([`BackEnd/pom.xml`](BackEnd/pom.xml)) |
-| **Base de données** | [PostgreSQL](https://www.postgresql.org/) (connexion JDBC / Hibernate ; pas de BaaS type Supabase dans la stack retenue) |
-| **Front web** | [Tailwind CSS](https://tailwindcss.com/) v4 + PostCSS déjà présents ; **framework UI (ex. React / Next.js) à initialiser** — voir [`FrontEnd/TACHES.md`](FrontEnd/TACHES.md) |
-| **Extension navigateur** | Dossier [`Extensions/`](Extensions/) — extension Chromium (Chrome/Edge/Brave) synchronisée avec l’API NutriFlow pour l’automatisation drive multi-enseignes |
-| **Mobile** | Dossier [`Mobile/`](Mobile/) réservé (fichiers de suivi uniquement pour l’instant) |
-| **Conteneurs** | Dossier [`Docker/`](Docker/) réservé |
-| **Intégrations** | [`integrations/`](integrations/) — Click & Collect, **Open Food Facts** (voir ci-dessous), **Playwright** en option pour des PoC drive (respecter les CGU des enseignes) |
-| **IA** | Appels **OpenAI** (ou équivalent) prévus **depuis le backend** (HTTP, quotas, timeouts) — pas LangChain imposé dans le code actuel |
+| **Base de données** | [PostgreSQL](https://www.postgresql.org/) via Docker — schéma géré par Hibernate (dev) / Flyway (prod) |
+| **Front web** | [Tailwind CSS](https://tailwindcss.com/) v4 + PostCSS — framework UI (React / Next.js) à initialiser |
+| **Extension navigateur** | [`Extensions/`](Extensions/) — Chromium (Chrome/Edge/Brave), sync multi-drive |
+| **Intégrations** | [`integrations/`](integrations/) — Open Food Facts, Click & Collect, Playwright |
+| **IA** | Appels OpenAI depuis le backend uniquement (HTTP, quotas, timeouts) |
 
-> Un second `pom.xml` à la **racine** du dépôt existe mais ne correspond pas au module applicatif principal : l’API à lancer est sous **`BackEnd/`**.
+> L'API à lancer est sous **`BackEnd/`**. Un `pom.xml` existe aussi à la racine mais n'est pas le module applicatif principal.
 
-### Données nutritionnelles de référence (produits)
+### Données nutritionnelles (Open Food Facts)
 
-Pour les **références alimentaires** sur produits emballés (énergie en kcal, protéines, glucides, lipides, sel, fibres, etc., en général **pour 100 g** ou par portion selon les champs disponibles), NutriFlow s’appuie sur la base [**Open Food Facts**](https://world.openfoodfacts.org/data).
-
-* **Documentation officielle** : [Data, API, exports et conditions de réutilisation](https://world.openfoodfacts.org/data) (licence **Open Database License** pour la base ; lire les conditions avant toute réutilisation).
-* **Usage prévu dans l’app** : appels à l’**API produit** (JSON/XML) **depuis le backend** (proxy, cache, en-tête `User-Agent` identifiable), pas depuis le navigateur — conformément aux bonnes pratiques décrites sur la page Data (en production, l’API live est pensée pour des consultations unitaires, par ex. liées à un scan réel ; les **exports** JSONL/CSV/Parquet servent aux usages de masse ou analytiques).
-* **Matching drive** : le rapprochement avec les paniers Click & Collect reste dans [`integrations/`](integrations/) ; les données OFF enrichissent ou valident les produits (code-barres / EAN quand disponible).
+Les données de référence produits (kcal, macros pour 100 g) viennent de [**Open Food Facts**](https://world.openfoodfacts.org/data) (licence ODbL). Les appels transitent **uniquement par le backend** — jamais depuis le navigateur.
 
 ---
 
-## Structure métier des données (aperçu)
-
-```mermaid
-erDiagram
-    USER ||--o| PROFILE : has
-    PROFILE ||--o| AGENDA : fills
-    AGENDA ||--o| RECIPE : contains
-    RECIPE ||--o| INGREDIENT : uses
-```
-
-Les entités Java en cours de modélisation se trouvent sous [`BackEnd/src/main/java/com/nutriflow/backend/entities/`](BackEnd/src/main/java/com/nutriflow/backend/entities/).
-
----
-
-## Suivi des tâches
-
-Des fichiers **`TACHES.md`** décrivent le travail par zone. L’index central est [`SUIVI-TACHES.md`](SUIVI-TACHES.md).
-
----
-
-## Roadmap de développement (alignée sur le repo)
-
-### Phase 1 : fondations
-- [ ] API Spring : sécurité (JWT ou session), validation, CORS avec l’URL du front.
-- [ ] Schéma PostgreSQL stable (Flyway ou Liquibase).
-- [ ] Front : choix et initialisation du framework + TypeScript + Tailwind + design system (couleurs maquette dans `FrontEnd/TACHES.md`).
-
-### Phase 2 : agenda et recettes
-- [ ] Vues planning / calendrier et suggestion de recettes (temps, macros).
-- [ ] Endpoints métier + intégration IA côté serveur pour adaptation des recettes.
-
-### Phase 3 : logistique et courses
-- [ ] Agrégation des ingrédients et génération de liste de courses.
-- [ ] Matching produits (EAN / libellés) avec enrichissement nutritionnel via [Open Food Facts](https://world.openfoodfacts.org/data) quand un code-barres est connu.
-- [ ] Expérimentations Click & Collect dans `integrations/` (Playwright + extension navigateur sync).
-- [ ] Architecture d’adaptateurs pour supporter plusieurs drives avec un même flux de sync.
-
-### Phase 4 : robustesse et PWA
-- [ ] PWA (manifest, service worker, hors-ligne lecture si possible).
-- [ ] Rappels / notifications (selon besoin produit).
-- [ ] Observabilité (Spring Boot Actuator, etc.).
-
----
-
-## Installation locale
+## Installation
 
 ### Prérequis
 
-- **JDK 21**, **Maven 3.x**
-- **PostgreSQL** (ex. base `nutriflow_db` — ajuster selon votre instance)
-- **Node.js** (pour le dossier `FrontEnd/` une fois le framework ajouté)
+- **JDK 21** (`java -version` doit retourner 21.x)
+- **Docker Desktop** ou **OrbStack**
+- **Maven** (le wrapper `mvnw` est inclus dans le repo)
+- **Node.js** (pour le front, une fois le framework ajouté)
 
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/<votre-org>/NutriChef-AI.git
+git clone git@github.com:Axelvrdn/NutriChef-AI.git
 cd NutriChef-AI
 ```
 
-### 2. Base de données et backend
+### 2. Démarrer la base de données
 
-Configurer la connexion dans [`BackEnd/src/main/resources/application.properties`](BackEnd/src/main/resources/application.properties) (URL JDBC, utilisateur, mot de passe), puis :
+```bash
+# Lance PostgreSQL + pgAdmin en arrière-plan
+docker-compose up -d
+
+# Vérifier que le conteneur est prêt (status = healthy)
+docker ps
+```
+
+> pgAdmin est accessible sur [http://localhost:8081](http://localhost:8081)
+> Email : `nael@nutri.com` — mot de passe : `admin`
+> Connexion interne : host `db`, port `5432`, user `nael`, password `password123`
+
+### 3. Lancer le backend (profil dev par défaut)
 
 ```bash
 cd BackEnd
 ./mvnw spring-boot:run
 ```
 
-*(Si `mvnw` est absent, utilisez `mvn spring-boot:run` après `mvn wrapper:wrapper` ou installez le wrapper Maven du projet.)*
+Au premier démarrage sur une BDD vide, le `DataSeeder` se déclenche automatiquement et insère le jeu de données de développement (utilisateurs, recettes, planning, feed…).
 
-### 3. Front-end
+---
 
-Aujourd’hui, seules les dépendances outillage CSS sont déclarées. Après initialisation du framework (voir tâches front) :
+## Commandes importantes
+
+### Docker
+
+| Commande | Description |
+| :--- | :--- |
+| `docker-compose up -d` | Démarre PostgreSQL + pgAdmin en arrière-plan |
+| `docker-compose up -d db` | Démarre uniquement PostgreSQL (sans pgAdmin) |
+| `docker-compose down` | Arrête les conteneurs (données conservées dans le volume) |
+| `docker-compose down -v` | Arrête les conteneurs **et supprime les données** (BDD réinitialisée) |
+| `docker ps` | Liste les conteneurs en cours d'exécution |
+| `docker logs nutriflow-db` | Logs du conteneur PostgreSQL |
+
+**Accès direct à la BDD en ligne de commande :**
 
 ```bash
-cd FrontEnd
-npm install
-# puis la commande fournie par le boilerplate (ex. npm run dev)
+docker exec -it nutriflow-db psql -U nael -d nutriflow_db
 ```
 
-Variables typiques côté front : URL de l’API (ex. `VITE_API_URL`, `NEXT_PUBLIC_API_URL`, etc. selon l’outil choisi).
+Commandes utiles une fois dans psql :
 
-### 4. Secrets (IA, drives)
-
-Ne pas commiter de clés. Exemples de variables à définir en local ou en CI :
-
-```env
-OPENAI_API_KEY=...
-# Identifiants drive / scripts : uniquement hors repo (vault, .env local ignoré par git)
+```sql
+\dt                          -- lister toutes les tables
+\d nom_de_la_table           -- décrire une table
+SELECT COUNT(*) FROM users;  -- vérifier le seed
+\q                           -- quitter
 ```
 
 ---
 
-## Principes de design (front)
+### Backend Spring Boot
 
-* **Lisibilité :** beaucoup d’air, typographie claire.
-* **Transitions :** animations discrètes si le projet adopte une librairie dédiée (ex. Framer Motion — optionnelle).
-* **Accessibilité :** contrastes et zones tactiles suffisantes pour usage en cuisine.
+| Commande | Description |
+| :--- | :--- |
+| `./mvnw spring-boot:run` | Lance l'API en profil **dev** (défaut) |
+| `./mvnw spring-boot:run -Dspring-boot.run.profiles=prod` | Lance en profil **prod** (nécessite les variables d'env) |
+| `./mvnw test` | Exécute les tests unitaires |
+| `./mvnw clean package` | Compile et génère le JAR dans `target/` |
+| `./mvnw clean package -DskipTests` | Compile sans lancer les tests |
+| `./mvnw dependency:tree` | Affiche l'arbre des dépendances Maven |
+
+**Switcher de profil via variable d'environnement (alternative) :**
+
+```bash
+SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
+```
+
+---
+
+### Profils dev / prod
+
+Le fichier [`BackEnd/src/main/resources/application.properties`](BackEnd/src/main/resources/application.properties) définit le profil actif par défaut (`dev`). Chaque profil a son fichier dédié :
+
+| Fichier | Profil | Comportement |
+| :--- | :--- | :--- |
+| `application-dev.properties` | `dev` | BDD locale Docker, SQL visible dans les logs, seed automatique, auth simplifiée |
+| `application-prod.properties` | `prod` | BDD via variables d'env, `ddl-auto=validate`, pas de seed, auth stricte (JWT) |
+
+**Changer le profil par défaut** dans `application.properties` :
+
+```properties
+spring.profiles.active=prod   # ← changer ici
+```
+
+---
+
+### Jeu de données dev (DataSeeder)
+
+Le seed se déclenche automatiquement au démarrage si la BDD est vide. Pour le **réinitialiser** :
+
+```bash
+# 1. Supprimer les données et relancer la BDD
+docker-compose down -v && docker-compose up -d db
+
+# 2. Relancer Spring Boot — le seed se relance automatiquement
+cd BackEnd && ./mvnw spring-boot:run
+```
+
+Données insérées par le seed :
+
+| Donnée | Détail |
+| :--- | :--- |
+| 3 utilisateurs | Elena Rose (Premium, expire dans 3 jours), Julianne Morel, Marcus Chen |
+| 6 recettes | Quinoa Tahini, Velouté Courge, Linguine Roquette, etc. avec images et catégories |
+| Planning semaine | Lun/Mar/Mer avec créneaux matin/midi/soir |
+| 5 posts Découvrir | 2 posts mockup + 3 éditos curatés pour la section Inspirations |
+| 4 collections | Rituels du Matin, Dîners Légers, Cuisine Solaire, Secrets d'Herboriste |
+| 4 abonnements | Relations follower/followed entre les 3 utilisateurs |
+
+---
+
+### Production (docker-compose.prod.yml)
+
+```bash
+# Copier et remplir le fichier de secrets
+cp .env.example .env
+# Éditer .env avec les vraies valeurs (DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD)
+
+# Lancer l'environnement de production
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+---
+
+### Git — conventions du projet
+
+Les branches suivent la convention `feat/`, `fix/`, `chore/` :
+
+```bash
+git checkout -b feat/nom-de-la-feature   # créer une branche
+git push -u origin feat/nom-de-la-feature # pousser et suivre la remote
+```
+
+Branches existantes notables :
+
+| Branche | Contenu |
+| :--- | :--- |
+| `main` | Code stable |
+| `develop` | Intégration continue |
+| `feat/bdd-domain-model-jpa-entities` | Schéma BDD complet + entités JPA + seed |
+
+---
+
+## Structure du projet
+
+```
+NutriChef-AI/
+├── BackEnd/               API Spring Boot (Java 21)
+│   └── src/main/
+│       ├── java/.../
+│       │   ├── config/    DataSeeder, future config sécurité
+│       │   ├── entities/  Entités JPA (User, Recipe, WeeklyPlan, etc.)
+│       │   └── repositories/
+│       └── resources/
+│           ├── application.properties          profil actif
+│           ├── application-dev.properties      config dev
+│           └── application-prod.properties     config prod
+├── FrontEnd/              Client web (Tailwind v4, framework à initialiser)
+├── Extensions/            Extension navigateur Chrome (Manifest V3)
+├── integrations/          Click & Collect, Open Food Facts, Playwright
+├── Docs/                  BDD-CONCEPTION.md, documentation technique
+├── Docker/                Réservé (Dockerfiles futurs)
+├── docker-compose.yml     Environnement dev (PostgreSQL + pgAdmin)
+├── docker-compose.prod.yml Environnement prod
+└── .env.example           Template variables d'environnement prod
+```
+
+---
+
+## Suivi des tâches
+
+Des fichiers **`TACHES.md`** décrivent le travail par zone. L'index central est [`SUIVI-TACHES.md`](SUIVI-TACHES.md). La conception de la BDD est dans [`Docs/BDD-CONCEPTION.md`](Docs/BDD-CONCEPTION.md).
+
+---
+
+## Roadmap
+
+### Phase 1 — fondations *(en cours)*
+- [x] Schéma BDD PostgreSQL (entités JPA, ERD complet)
+- [x] Jeu de données dev + profils dev/prod
+- [ ] Sécurité JWT (Spring Security + filtre d'authentification)
+- [ ] Migrations Flyway (`ddl-auto=validate` en prod)
+- [ ] Front : initialisation framework + design system
+
+### Phase 2 — agenda et recettes
+- [ ] Endpoints CRUD recettes, planning semaine
+- [ ] Intégration IA côté serveur (adaptation recettes)
+- [ ] Vues planning / calendrier
+
+### Phase 3 — logistique et courses
+- [ ] Génération liste de courses depuis le planning
+- [ ] Matching produits OFF (EAN / libellés)
+- [ ] Extension navigateur drive sync (Manifest V3, multi-enseignes)
+
+### Phase 4 — robustesse
+- [ ] PWA (manifest, service worker)
+- [ ] Notifications et rappels
+- [ ] Observabilité (Spring Boot Actuator)
 
 ---
 
 ## Note légale — Click & Collect
 
-Toute automatisation de navigateur (ex. Playwright) sur un site marchand doit respecter les **conditions d’utilisation** de l’enseigne, limiter la fréquence des actions et traiter les identifiants comme des **secrets**.
+Toute automatisation de navigateur (Playwright) sur un site marchand doit respecter les **conditions d'utilisation** de l'enseigne, limiter la fréquence des requêtes et traiter les identifiants comme des **secrets** (jamais dans le repo).

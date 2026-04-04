@@ -1,0 +1,47 @@
+# ===============================================================
+#  NutriFlow — environnement PROD
+#  Usage : docker-compose -f docker-compose.prod.yml up -d
+#
+#  Variables d'env requises (fichier .env ou secrets CI) :
+#    DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD
+#    PGADMIN_EMAIL, PGADMIN_PASSWORD  (optionnel)
+# ===============================================================
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: nutriflow-db-prod
+    environment:
+      POSTGRES_DB: nutriflow_db
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d nutriflow_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./BackEnd
+      dockerfile: Dockerfile
+    container_name: nutriflow-backend-prod
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  postgres_data_prod:

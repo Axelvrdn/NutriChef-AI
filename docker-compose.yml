@@ -1,4 +1,8 @@
-version: '3.8'
+# ===============================================================
+#  NutriFlow — environnement DEV
+#  Usage : docker-compose up -d
+#  Profil Spring : dev (seed auto, SQL visible, auth simplifiée)
+# ===============================================================
 
 services:
   db:
@@ -12,6 +16,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nael -d nutriflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   pgadmin:
     image: dpage/pgadmin4
@@ -22,7 +31,8 @@ services:
     ports:
       - "8081:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
