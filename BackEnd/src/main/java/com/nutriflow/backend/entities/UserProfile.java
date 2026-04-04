@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -16,12 +17,29 @@ import java.util.UUID;
 public class UserProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @OneToOne(optional = false)
+    @MapsId
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    // --- Identité publique (profil affiché) ---
+
+    @Column(name = "display_name")
+    private String displayName;
+
+    /** Ligne sous le nom : ex. "Culinary Alchemist & Wellness Guide" */
+    @Column(name = "subtitle")
+    private String subtitle;
+
+    @Column(name = "bio", columnDefinition = "text")
+    private String bio;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    // --- Données physiologiques ---
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -41,6 +59,56 @@ public class UserProfile {
     @Column(nullable = false)
     private Goal goal;
 
+    // --- ADN Culinaire (Paramètres screen) ---
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cooking_level")
+    private CookingLevel cookingLevel;
+
+    /** jsonb : ex. ["vegetarian","gluten_free","paleo"] */
+    @Column(name = "diet_preferences", columnDefinition = "jsonb")
+    private String dietPreferences;
+
+    /** jsonb : ex. ["lactose","arachides","crustaces"] */
+    @Column(name = "intolerances", columnDefinition = "jsonb")
+    private String intolerances;
+
+    /** jsonb : ex. ["gluten","fruits_a_coque"] */
+    @Column(name = "allergies", columnDefinition = "jsonb")
+    private String allergies;
+
+    // --- Objectifs nutritionnels (Tableau de bord) ---
+
+    @Column(name = "kcal_goal")
+    private Integer kcalGoal;
+
+    @Column(name = "protein_goal_g")
+    private Integer proteinGoalG;
+
+    @Column(name = "carb_goal_g")
+    private Integer carbGoalG;
+
+    @Column(name = "fat_goal_g")
+    private Integer fatGoalG;
+
+    @Column(name = "hydration_goal_ml")
+    private Integer hydrationGoalMl;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public enum Gender {
         HOMME,
         FEMME,
@@ -57,6 +125,13 @@ public class UserProfile {
         PERTE,
         GAIN,
         MAINTIEN
+    }
+
+    public enum CookingLevel {
+        DEBUTANT,
+        INITIE,
+        INTERMEDIAIRE,
+        AVANCE
     }
 }
 

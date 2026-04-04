@@ -2,36 +2,28 @@ package com.nutriflow.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Table(name = "ingredients")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class User {
+public class Ingredient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
-    private String email;
-
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
-    @Column(unique = true, length = 50)
-    private String username;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status;
+    @Column(name = "default_unit")
+    private String defaultUnit;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -44,20 +36,11 @@ public class User {
         var now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
-        if (this.role == null) this.role = Role.USER;
-        if (this.status == null) this.status = Status.ACTIVE;
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
-    public enum Role {
-        USER, ADMIN, NUTRITIONIST
-    }
-
-    public enum Status {
-        ACTIVE, PENDING, DISABLED
-    }
 }
+
