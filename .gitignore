@@ -36,3 +36,8 @@ build/
 .env
 *.env.local
 
+### FrontEnd generated ###
+FrontEnd/node_modules/
+FrontEnd/.next/
+FrontEnd/.vercel/
+
