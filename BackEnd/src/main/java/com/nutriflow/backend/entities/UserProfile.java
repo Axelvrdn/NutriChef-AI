@@ -2,6 +2,8 @@ package com.nutriflow.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,14 +68,17 @@ public class UserProfile {
     private CookingLevel cookingLevel;
 
     /** jsonb : ex. ["vegetarian","gluten_free","paleo"] */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "diet_preferences", columnDefinition = "jsonb")
     private String dietPreferences;
 
     /** jsonb : ex. ["lactose","arachides","crustaces"] */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "intolerances", columnDefinition = "jsonb")
     private String intolerances;
 
     /** jsonb : ex. ["gluten","fruits_a_coque"] */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "allergies", columnDefinition = "jsonb")
     private String allergies;
 
