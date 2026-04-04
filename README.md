@@ -10,6 +10,7 @@
 * **Agenda hybride :** planifier la semaine en distinguant repas **à la maison**, **au restaurant** ou **à l’extérieur**, pour éviter d’acheter des ingrédients inutiles.
 * **Moteur de recettes assisté par IA :** réécrire ou raccourcir les étapes selon le temps et le matériel disponibles (objectif métier ; l’appel IA sera orchestré côté **backend**).
 * **Click & Collect :** rapprocher la liste de courses des catalogues drive (matching produits, scripts d’automatisation — voir dossier `integrations/`).
+* **Extension navigateur drive sync :** lancer l’ajout panier depuis NutriFlow vers plusieurs enseignes via un modèle d’adaptateurs.
 * **Expérience web / PWA :** interface claire, utilisable sur mobile ; la couche PWA est une **cible** du front (voir `FrontEnd/TACHES.md`).
 
 ---
@@ -23,6 +24,7 @@ Le dépôt est un **monorepo** : API Java, client web en cours de montage, dossi
 | **API** | [Spring Boot](https://spring.io/projects/spring-boot) **3.2.x**, **Java 21** — Web + Spring Data JPA ([`BackEnd/pom.xml`](BackEnd/pom.xml)) |
 | **Base de données** | [PostgreSQL](https://www.postgresql.org/) (connexion JDBC / Hibernate ; pas de BaaS type Supabase dans la stack retenue) |
 | **Front web** | [Tailwind CSS](https://tailwindcss.com/) v4 + PostCSS déjà présents ; **framework UI (ex. React / Next.js) à initialiser** — voir [`FrontEnd/TACHES.md`](FrontEnd/TACHES.md) |
+| **Extension navigateur** | Dossier [`Extensions/`](Extensions/) — extension Chromium (Chrome/Edge/Brave) synchronisée avec l’API NutriFlow pour l’automatisation drive multi-enseignes |
 | **Mobile** | Dossier [`Mobile/`](Mobile/) réservé (fichiers de suivi uniquement pour l’instant) |
 | **Conteneurs** | Dossier [`Docker/`](Docker/) réservé |
 | **Intégrations** | [`integrations/`](integrations/) — Click & Collect, **Open Food Facts** (voir ci-dessous), **Playwright** en option pour des PoC drive (respecter les CGU des enseignes) |
@@ -74,7 +76,8 @@ Des fichiers **`TACHES.md`** décrivent le travail par zone. L’index central e
 ### Phase 3 : logistique et courses
 - [ ] Agrégation des ingrédients et génération de liste de courses.
 - [ ] Matching produits (EAN / libellés) avec enrichissement nutritionnel via [Open Food Facts](https://world.openfoodfacts.org/data) quand un code-barres est connu.
-- [ ] Expérimentations Click & Collect dans `integrations/` (dont Playwright si pertinent).
+- [ ] Expérimentations Click & Collect dans `integrations/` (Playwright + extension navigateur sync).
+- [ ] Architecture d’adaptateurs pour supporter plusieurs drives avec un même flux de sync.
 
 ### Phase 4 : robustesse et PWA
 - [ ] PWA (manifest, service worker, hors-ligne lecture si possible).

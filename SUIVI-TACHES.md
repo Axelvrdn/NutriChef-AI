@@ -10,24 +10,25 @@ Ce fichier est l’**index** des travaux par zone du dépôt. Le détail vivant 
 
 ## Totaux (mars 2026)
 
-Comptage exact des lignes `- [ ]` / `- [x]` dans tous les `TACHES.md` : **~240** (recalculer avec un script après modification des listes — chiffre indicatif post-ajouts Open Food Facts).
+Comptage exact des lignes `- [ ]` / `- [x]` dans tous les `TACHES.md` : **~256** (recalculer avec un script après modification des listes — chiffre indicatif).
 
 | Zone | Tâches |
 | :--- | ---: |
-| Racine `src/`, `Docs/`, `Docker/`, `integrations/`, `Mobile/` | ~32 |
+| Racine `src/`, `Docs/`, `Docker/`, `integrations/`, `Mobile/`, `Extensions/` | ~48 |
 | `BackEnd/` (racine + sous-packages) | ~73 |
 | `FrontEnd/` (racine + `src/` et sous-dossiers) | ~135 |
-| **Total** | **~240** |
+| **Total** | **~256** |
 
 ## Vue d’ensemble (à recalculer depuis les sous-fichiers)
 
 | Zone | Fichier | Tâches (total) | Fait | Reste |
 | :--- | :--- | ---: | ---: | ---: |
 | Racine `src/` (legacy) | [`src/TACHES.md`](src/TACHES.md) | 4 | 0 | 4 |
-| Documentation | [`Docs/TACHES.md`](Docs/TACHES.md) | 6 | 0 | 6 |
+| Documentation | [`Docs/TACHES.md`](Docs/TACHES.md) | 7 | 0 | 7 |
 | Docker | [`Docker/TACHES.md`](Docker/TACHES.md) | 5 | 0 | 5 |
-| Intégrations (courses, IA externe) | [`integrations/TACHES.md`](integrations/TACHES.md) | 8 | 0 | 8 |
-| Mobile | [`Mobile/TACHES.md`](Mobile/TACHES.md) | 5 | 0 | 5 |
+| Intégrations (courses, IA externe) | [`integrations/TACHES.md`](integrations/TACHES.md) | 12 | 0 | 12 |
+| Mobile | [`Mobile/TACHES.md`](Mobile/TACHES.md) | 6 | 0 | 6 |
+| Extension navigateur | [`Extensions/TACHES.md`](Extensions/TACHES.md) | 12 | 0 | 12 |
 | Back-end (Spring) | [`BackEnd/TACHES.md`](BackEnd/TACHES.md) | — | — | — |
 | Front-end | [`FrontEnd/TACHES.md`](FrontEnd/TACHES.md) | — | — | — |
 
@@ -68,6 +69,12 @@ Les lignes « — » pour BackEnd / FrontEnd : voir les tableaux récapitulatifs
 | Contexte | [`FrontEnd/src/context/TACHES.md`](FrontEnd/src/context/TACHES.md) |
 | Assets | [`FrontEnd/src/assets/TACHES.md`](FrontEnd/src/assets/TACHES.md) |
 | Pages (legacy) | [`FrontEnd/src/pages/TACHES.md`](FrontEnd/src/pages/TACHES.md) |
+
+### Extensions navigateur (`Extensions/`)
+
+| Dossier | Fichier |
+| :--- | :--- |
+| Extension Drive Sync | [`Extensions/TACHES.md`](Extensions/TACHES.md) |
 
 ---
 
