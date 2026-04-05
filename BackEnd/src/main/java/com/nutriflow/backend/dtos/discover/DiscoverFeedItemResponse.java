@@ -19,6 +19,9 @@ public record DiscoverFeedItemResponse(
         String authorDisplayName,
         String authorAvatarUrl,
         UUID recipeId,
-        String recipeTitle
+        String recipeTitle,
+        long likeCount,
+        long commentCount,
+        boolean likedByCurrentUser
 ) {
 }

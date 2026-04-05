@@ -1,9 +1,12 @@
 package com.nutriflow.backend.controllers;
 
 import com.nutriflow.backend.dtos.me.MeResponse;
+import com.nutriflow.backend.dtos.me.UpdateProfileRequest;
 import com.nutriflow.backend.services.MeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,5 +20,10 @@ public class MeController {
     @GetMapping
     public MeResponse getMe() {
         return meService.getCurrentMe();
+    }
+
+    @PatchMapping
+    public MeResponse updateMe(@RequestBody UpdateProfileRequest request) {
+        return meService.updateProfile(request);
     }
 }

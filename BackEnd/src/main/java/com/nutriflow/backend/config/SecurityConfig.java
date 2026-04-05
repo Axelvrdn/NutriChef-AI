@@ -40,6 +40,12 @@ public class SecurityConfig {
     @Value("${nutriflow.cors.allowed-origins:*}")
     private String allowedOrigins;
 
+    @Value("${nutriflow.cors.allowed-origin-patterns:}")
+    private String allowedOriginPatterns;
+
+    @Value("${nutriflow.cors.allow-credentials:true}")
+    private boolean allowCredentials;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -85,22 +91,50 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .toList();
-        if (origins.size() == 1 && "*".equals(origins.getFirst())) {
-            configuration.addAllowedOriginPattern("*");
-            configuration.setAllowCredentials(false);
-        } else {
-            configuration.setAllowedOrigins(origins);
-            configuration.setAllowCredentials(true);
+
+        List<String> origins = splitCsv(allowedOrigins);
+        List<String> originPatterns = splitCsv(allowedOriginPatterns);
+
+        if (!originPatterns.isEmpty()) {
+            configuration.setAllowedOriginPatterns(originPatterns);
         }
+
+        if (!origins.isEmpty()) {
+            if (origins.size() == 1 && "*".equals(origins.getFirst())) {
+                configuration.addAllowedOriginPattern("*");
+                configuration.setAllowCredentials(false);
+            } else {
+                configuration.setAllowedOrigins(origins);
+                configuration.setAllowCredentials(allowCredentials);
+            }
+        } else if (originPatterns.isEmpty()) {
+            // Fallback permissif pour ne pas casser l'environnement local.
+            configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+            configuration.setAllowCredentials(true);
+        } else {
+            configuration.setAllowCredentials(allowCredentials);
+        }
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"
+        ));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private List<String> splitCsv(String csv) {
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
     }
 }

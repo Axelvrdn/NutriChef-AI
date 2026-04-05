@@ -35,6 +35,9 @@ public class MealLogItem {
     @JoinColumn(name = "off_product_id")
     private Food offProduct;
 
+    @Column(name = "label")
+    private String label;
+
     @Column(name = "quantity", nullable = false)
     private Double quantity;
 
