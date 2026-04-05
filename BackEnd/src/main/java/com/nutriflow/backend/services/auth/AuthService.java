@@ -6,6 +6,7 @@ import com.nutriflow.backend.dtos.auth.LoginRequest;
 import com.nutriflow.backend.dtos.auth.RegisterRequest;
 import com.nutriflow.backend.entities.User;
 import com.nutriflow.backend.entities.UserProfile;
+import com.nutriflow.backend.exception.ConflictException;
 import com.nutriflow.backend.repositories.UserProfileRepository;
 import com.nutriflow.backend.repositories.UserRepository;
 import com.nutriflow.backend.security.JwtService;
@@ -38,10 +39,10 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email déjà utilisé.");
+            throw new ConflictException("Email déjà utilisé.");
         }
         if (userRepository.findByUsername(request.username()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username déjà utilisé.");
+            throw new ConflictException("Username déjà utilisé.");
         }
 
         User user = userRepository.save(User.builder()
