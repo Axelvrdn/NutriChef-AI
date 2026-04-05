@@ -7,12 +7,12 @@
 | Métrique | Valeur |
 | :--- | ---: |
 | **Total** | 4 |
-| **Fait** | 0 |
-| **Reste** | 4 |
+| **Fait** | 1 |
+| **Reste** | 3 |
 
 ## Tâches
 
-- [ ] `AuthProvider` : session et profil minimal.
-- [ ] `UIProvider` : sidebar repliée, modals globaux (si besoin).
-- [ ] Éviter le sur-contexte : préférer données serveur cache (React Query) quand possible.
-- [ ] Tests de rendu des providers (smoke).
+- [x] `AuthContext` / `AuthProvider` : session utilisateur, tokens JWT, profil minimal, hook `useAuth`.
+- [ ] `UIProvider` : état sidebar repliée/ouverte, modals globaux (si besoin).
+- [ ] Éviter le sur-contexte : préférer données serveur cache (React Query / SWR) quand possible — à évaluer lors de l'implémentation des features.
+- [ ] Tests de rendu des providers (smoke) avec React Testing Library.
