@@ -185,7 +185,8 @@ Branches existantes notables :
 | :--- | :--- |
 | `main` | Code stable |
 | `develop` | Intégration continue |
-| `feat/bdd-domain-model-jpa-entities` | Schéma BDD complet + entités JPA + seed |
+| `feat/bdd-domain-model-jpa-entities` | Schéma BDD complet + entités JPA + seed + JWT + endpoints REST |
+| `feat/frontend-next-foundation` | Scaffolding Next.js, services, AuthContext, routes |
 
 ---
 
@@ -196,20 +197,32 @@ NutriChef-AI/
 ├── BackEnd/               API Spring Boot (Java 21)
 │   └── src/main/
 │       ├── java/.../
-│       │   ├── config/    DataSeeder, future config sécurité
-│       │   ├── entities/  Entités JPA (User, Recipe, WeeklyPlan, etc.)
-│       │   └── repositories/
+│       │   ├── config/        DataSeeder, SecurityConfig, profils
+│       │   ├── entities/      Entités JPA (User, Recipe, WeeklyPlan, DiscoverPost, etc.)
+│       │   ├── repositories/  Spring Data JPA
+│       │   ├── services/      Auth, Me, Recipe, Planning, Discover, MealLog…
+│       │   ├── controllers/   Auth, Me, Recipe, Planning, Discover, MealLog, PostInteraction
+│       │   ├── dtos/          auth/, me/, recipes/, planning/, discover/
+│       │   └── security/      JwtService, JwtAuthenticationFilter, CustomUserDetailsService
 │       └── resources/
-│           ├── application.properties          profil actif
+│           ├── application.properties          profil actif (dev par défaut)
 │           ├── application-dev.properties      config dev
-│           └── application-prod.properties     config prod
-├── FrontEnd/              Client web (Tailwind v4, framework à initialiser)
+│           ├── application-prod.properties     config prod
+│           └── db/migration/V1__init_schema.sql Flyway placeholder
+├── FrontEnd/              Next.js App Router + TypeScript + Tailwind v4
+│   └── src/
+│       ├── app/(app)/     Tableau de bord, Recettes, Agenda, Découvrir, Paramètres
+│       ├── app/(auth)/    Login, Register
+│       ├── app/(onboarding)/
+│       ├── context/       AuthContext
+│       ├── services/      http, auth, recipes, planning, discover, user, mealLog…
+│       └── types/         api.ts
 ├── Extensions/            Extension navigateur Chrome (Manifest V3)
 ├── integrations/          Click & Collect, Open Food Facts, Playwright
 ├── Docs/                  BDD-CONCEPTION.md, documentation technique
 ├── Docker/                Réservé (Dockerfiles futurs)
 ├── docker-compose.yml     Environnement dev (PostgreSQL + pgAdmin)
-├── docker-compose.prod.yml Environnement prod
+├── docker-compose.prod.yml Environnement prod (backend + DB conteneurisés)
 └── .env.example           Template variables d'environnement prod
 ```
 
@@ -223,27 +236,35 @@ Des fichiers **`TACHES.md`** décrivent le travail par zone. L'index central est
 
 ## Roadmap
 
-### Phase 1 — fondations *(en cours)*
-- [x] Schéma BDD PostgreSQL (entités JPA, ERD complet)
-- [x] Jeu de données dev + profils dev/prod
-- [ ] Sécurité JWT (Spring Security + filtre d'authentification)
-- [ ] Migrations Flyway (`ddl-auto=validate` en prod)
-- [ ] Front : initialisation framework + design system
+### Phase 1 — fondations ✅ *complète*
+- [x] Schéma BDD PostgreSQL (entités JPA, ERD complet — social, collections, abonnements, journal, logistique)
+- [x] Jeu de données dev + profils dev/prod (`DataSeeder`, `application-dev/prod.properties`)
+- [x] Sécurité JWT : Spring Security, `JwtAuthenticationFilter`, access + refresh tokens avec rotation
+- [x] Premiers endpoints REST : `/auth/*`, `GET /api/me`, `GET/POST /api/recipes`, `GET /api/planning/current-week`, `GET /api/discover/feed`, `POST /api/meal-log`, interactions posts
+- [x] Frontend : initialisation Next.js App Router + TypeScript + Tailwind v4, routes scaffoldées, `AuthContext`, services HTTP
+- [x] Migrations Flyway complètes — `V1__init_schema.sql` contient le DDL initial complet, Flyway activé en `dev` et `prod`
+- [x] Gestion d'erreurs centralisée (`@RestControllerAdvice`, format `ErrorResponse`)
 
-### Phase 2 — agenda et recettes
-- [ ] Endpoints CRUD recettes, planning semaine
-- [ ] Intégration IA côté serveur (adaptation recettes)
-- [ ] Vues planning / calendrier
+### Phase 2 — agenda et recettes *(en cours)*
+- [ ] Endpoints complets recettes : `PUT`, `DELETE`, `GET /{id}`, filtres et pagination
+- [ ] Endpoints planning : ajout/suppression de créneaux, vue par semaine arbitraire
+- [ ] PATCH `/api/me` : mise à jour profil ADN culinaire
+- [ ] Intégration IA côté serveur (appel GPT-4o, prompts versionnés, garde-fous)
+- [ ] Vues planning / calendrier côté frontend (feature `agenda/`)
+- [ ] Vues recettes côté frontend (feature `recipes/`)
 
 ### Phase 3 — logistique et courses
-- [ ] Génération liste de courses depuis le planning
-- [ ] Matching produits OFF (EAN / libellés)
+- [ ] Génération liste de courses depuis le planning (service + endpoint)
+- [ ] Proxy Open Food Facts : résolution EAN, cache TTL, endpoint `/api/nutrition/{barcode}`
 - [ ] Extension navigateur drive sync (Manifest V3, multi-enseignes)
+- [ ] Parcours scan code-barres côté front
 
 ### Phase 4 — robustesse
-- [ ] PWA (manifest, service worker)
-- [ ] Notifications et rappels
-- [ ] Observabilité (Spring Boot Actuator)
+- [ ] Migrations Flyway : passer `ddl-auto=validate` en prod avec scripts versionnés
+- [ ] PWA (manifest, service worker, mode hors-ligne lecture recettes)
+- [ ] Notifications et rappels (push / email)
+- [ ] Observabilité (Spring Boot Actuator, métriques, logs structurés)
+- [ ] CI/CD : `mvn test` + lint front sur chaque PR, pipeline GitHub Actions
 
 ---
 

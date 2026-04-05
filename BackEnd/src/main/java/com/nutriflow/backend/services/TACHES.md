@@ -6,20 +6,23 @@
 
 | Métrique | Valeur |
 | :--- | ---: |
-| **Total** | 11 |
-| **Fait** | 0 |
-| **Reste** | 11 |
+| **Total** | 14 |
+| **Fait** | 6 |
+| **Reste** | 8 |
 
 ## Tâches
 
-- [ ] Service **UserProfile** : CRUD ADN culinaire, calcul besoins (macros) si applicable.
-- [ ] Service **Recipe** : CRUD, suggestion selon profil et contraintes temps/macros.
-- [ ] Service **Planner** : affectation recettes aux créneaux, gestion « hors foyer » (pas d’ingrédients).
+- [x] Service **Auth** : inscription (hash BCrypt), connexion, émission et rotation des tokens JWT (`AuthService`, `RefreshTokenService`).
+- [x] Service **AuthenticatedUser** : résolution de l'utilisateur courant depuis le contexte Spring Security.
+- [x] Service **Me** : lecture du profil courant (`MeService`).
+- [ ] Service **UserProfile** : CRUD complet ADN culinaire, calcul besoins (macros) si applicable.
+- [x] Service **Recipe** : liste et création de base (`RecipeService`) — suggestion selon profil, update/delete à compléter.
+- [x] Service **Planner** : lecture semaine courante (`PlanningService`) — ajout/suppression de créneaux à compléter.
 - [ ] Service **ShoppingList** : agrégation des ingrédients de la semaine, déduplication, unités.
-- [ ] Service **Open Food Facts** (ou client dédié) : résolution par **code-barres** (EAN), extraction des nutriments pertinents (énergie kcal, protéines, glucides, lipides, sel, etc. — champs type `*_100g` selon [la doc des champs](https://world.openfoodfacts.org/data/data-fields.txt)), gestion « produit inconnu », cache TTL.
+- [ ] Service **Open Food Facts** (ou client dédié) : résolution par code-barres (EAN), extraction nutriments (`*_100g`), gestion « produit inconnu », cache TTL — voir [doc champs](https://world.openfoodfacts.org/data/data-fields.txt).
 - [ ] **IA Recipe Engine** : appel GPT-4o (ou équivalent) pour réécriture selon matériel et durée.
 - [ ] Prompts versionnés, garde-fous (refus hors cuisine), logging des tokens.
-- [ ] Service **Discover / feed** : contenus personnalisés ou curated (stub puis règles).
+- [x] Service **Discover** : feed paginé + interactions posts (`DiscoverService`, `PostInteractionService`).
 - [ ] Service **Notifications** : préférences + hooks pour rappels (push/email selon stack).
-- [ ] Service **Abonnement** : statut premium, dates d’expiration (aligné maquette « vérification requise »).
+- [ ] Service **Abonnement** : statut premium, dates d'expiration (aligné maquette « vérification requise »).
 - [ ] Tests unitaires des règles métier (pure logic + mocks clients IA).
